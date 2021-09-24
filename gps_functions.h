@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <string.h>                  /*Includes das bibliotecas*/
+#include <string.h>
 #include <stdlib.h>
 #include <g2.h>
 #include <g2_X11.h>
