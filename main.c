@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
             return 0;
         }
 
-        printf("\nDurante a sua viagem, há algum lugar em especial que gostaria de visitar? Sim ou Nao?\n");
+        printf("\nDuring your journey, is there any intermediate town you would like to visit? Yes/No\n");
         scanf("%s", resp);
 
         if (strcmp(resp, "Yes") == 0)
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
         /* File data to matrix */
         /* Reads matrix with coordinate data and creates the map */
-        read_borders("fronteiras_distritos.txt", border_name, angular_coordinates, final_coordinates); 
+        read_borders("borders_districts.txt", border_name, angular_coordinates, final_coordinates); 
 
         printf("\nHow many seconds would you like to look at the map before inputting a new route?\n");
         scanf("%d", &time);

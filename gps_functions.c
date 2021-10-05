@@ -1,8 +1,8 @@
 #include "gps_functions.h"
 
-/******************************************/
-/* Passa e converte points para Matriz    */
-/******************************************/
+/*************************/
+/* Adds points to matrix */
+/*************************/
 
 char read_borders(char file_name[], char border_name[N_BORDERS][SIZE], float angular_coordinates[N_BORDERS][N_POINTS_BORDER][2], float final_coordinates[N_BORDERS][N_POINTS_BORDER][2])
 {
@@ -16,11 +16,11 @@ char read_borders(char file_name[], char border_name[N_BORDERS][SIZE], float ang
 
     a = 0;
 
-    fp = fopen(file_name, "r"); /* Abre o ficheiro. */
+    fp = fopen(file_name, "r"); /* Opens the file */
 
     if (fp == NULL)
-    { /* Mensagem de erro na abertura. */
-        printf("Erro ao abrir o ficheiro.\n");
+    {
+        printf("Error opening file.\n");
         return 0;
     }
 
@@ -30,14 +30,14 @@ char read_borders(char file_name[], char border_name[N_BORDERS][SIZE], float ang
         {
             fgets(line, N_BORDERS, fp);
 
-            if (line[0] == 'F')               /* Nome das fronteiras. */
-                strcpy(border_name[a], line); /* Copiar para o vector o conteúdo da linha. */
+            if (line[0] == 'F')               /* Border name. */
+                strcpy(border_name[a], line); /* Copies line content to vector. */
 
             else
             {
                 convertions = sscanf(line, "%f %f", &latitude, &longitude);
 
-                if (convertions == 2) /* Latitude e Longitude dos points. */
+                if (convertions == 2) /* Latitude and Longitude of the points. */
                 {
                     for (b = 0; b < 4; b = b + 1)
                     {
@@ -48,7 +48,7 @@ char read_borders(char file_name[], char border_name[N_BORDERS][SIZE], float ang
                 }
             }
 
-            if (feof(fp)) /* A funcao so termina com o fim do ficheiro. */
+            if (feof(fp)) /* End at EOF. */
                 n_lines = -1;
         } while (n_lines != -1);
     }
@@ -61,7 +61,7 @@ char read_borders(char file_name[], char border_name[N_BORDERS][SIZE], float ang
                 final_coordinates[a][b][0] = 6371 * tan(PI * (angular_coordinates[a][b][0] - IST_LATITUDE) / 180);
                 final_coordinates[a][b][1] = 6371 * cos(PI * angular_coordinates[a][b][0] / 180) * tan(PI * (angular_coordinates[a][b][1] - IST_LONGITUDE) / 180);
 
-                /* Assumindo o grandioso Instituto Superior Tecnico como centro do nosso referencial. */
+                /* Assuming University of Lisbon - Instituto Superior Técnico as the center. */
             }
 
             if (feof(fp))
@@ -74,9 +74,9 @@ char read_borders(char file_name[], char border_name[N_BORDERS][SIZE], float ang
     return 0;
 }
 
-/******************************************/
-/* Desenha mapa, amplia, etc...           */
-/******************************************/
+/*************************************/
+/* Draws map, zooms in ...           */
+/*************************************/
 
 void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampliation, char border_name[N_BORDERS][SIZE], int argc, char *argv[], POINT *top, POINT *top2, LIST *x, char *resp, int center_x, int center_y, int time)
 {
@@ -92,7 +92,7 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
     POINT *aux;
     LIST *auxe;
 
-    /* Detectar o distrito escolhido. */
+    /* Detect chosen district. */
     for (k = 0; k < argc; k++)
     {
         if (strcmp(argv[k], "-d") == 0)
@@ -101,7 +101,7 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
         }
     }
 
-    /* Detectar o factor de ampliação desejado. */
+    /* Detect chosen zoom. */
     for (k = 0; k < argc; k++)
     {
         if (strcmp(argv[k], "-a") == 0)
@@ -110,7 +110,7 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
         }
     }
 
-    /* Detectar a cor escolhida. */
+    /* Detect chosen color. */
     for (k = 0; k < argc; k++)
     {
         if (strcmp(argv[k], "-c") == 0)
@@ -126,7 +126,7 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
     g2_set_auto_flush(d, 0);
     /*  g2_move_r (d, 41254265766, 46552457532); */
     g2_set_line_width(d, 3);
-    g2_set_background(d, 1); /* Definir a cor do fundo como preto (MODO NOCTURNO). */
+    g2_set_background(d, 1); /* Background color is black (DARK MODE). */
     g2_pen(d, 0);
     g2_set_font_size(d, 35);
 
@@ -139,10 +139,10 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
             sscanf(border_name[l], "F (%[^)]) (%[^)])", district1, district2);
 
             if ((strcmp(district, district1) == 0) || ((strcmp(district, district2) == 0)))
-                g2_pen(d, color_of_borders); /* Caso seja encontrado o distrito procurado na matriz border_name, este é desenhado com a cor desejada *supostamente* */
+                g2_pen(d, color_of_borders); /* If the district seeked in the border_name matrix is found, it's drawn with the desired color (supposedly) */
 
             else
-                g2_pen(d, 0); /* Caso contrário, o mapa é desenhado normalmente, com a cor especificada (branco). */
+                g2_pen(d, 0); /* Otherwise, the map is drawn normally, with the specified color (white). */
 
             g2_line(d, final_coordinates[l][m][1], final_coordinates[l][m][0], final_coordinates[l][m + 1][1], final_coordinates[l][m + 1][0]);
         }
@@ -151,7 +151,7 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
 
     if (argc == 1)
     {
-        printf("\n Exemplo para destacar um distrito: \n\t./gps2013 -c vermelho -a 1.2 -d Viana_do_Castelo\n\tA ordem dos comandos nao importa. Os numeros representam o valor da ampliacao, a cor e o distrito a destacar pretendidos.");
+        printf("\n How to highlight a district: \n\t./gps2013 -c vermelho -a 1.2 -d Viana_do_Castelo\n\tThe order of the commands is not important. The numbers represent the zoom value, colour and name of the district to highlight.");
 
         g2_pen(d, 0);
 
@@ -166,7 +166,7 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
     }
 
     if (strcmp(resp, "Sim") == 0)
-    { /*Se sim, desenha duas rotas, uma do destino até a int, e outra da int. ao destino*/
+    { /* If yes, draw two routes, onde from destination to int, the other from int to the destination */
         aux = top;
         aux = aux->prox;
 
@@ -218,7 +218,7 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
             aux = (*aux).prox;
         }
 
-        top = top->prox; /*Se não, desenha uma rota do inico ate ao destino*/
+        top = top->prox; /* If not, draw a rout from the beggining to the end */
         while (top->prox != NULL)
         {
             g2_pen(d, 19);
@@ -238,7 +238,7 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
         auxe->a.lat2 = 6371 * tan(PI * (auxe->a.lat2 - IST_LATITUDE) / 180);
 
         if ((*auxe).a.type1 == 'F')
-        { /*Desenha os pontos nas localidades, com cores diferentes*/
+        { /* Draws points in town coordinates, with different colors */
             g2_pen(d, 3);
             g2_filled_circle(d, auxe->a.long1, auxe->a.lat1, 1);
         }
@@ -278,50 +278,50 @@ void draw_map(float final_coordinates[N_BORDERS][N_POINTS_BORDER][2], float ampl
 
     g2_pen(d, 0);
     g2_line(d, 6371 * cos(PI * 37.166737 / 180) * tan(PI * (-7.392426 - IST_LONGITUDE) / 180), 6371 * tan(PI * (37.166737 - IST_LATITUDE) / 180), 6371 * cos(PI * 37.522652 / 180) * tan(PI * (-7.510529 - IST_LONGITUDE) / 180), 6371 * tan(PI * (37.522652 - IST_LATITUDE) / 180));
-    /* Medida desesperada para corrigir uma fronteira que nunca aparecia */
+    /* Desperade measure to correct a border which never showed up */
 
     g2_flush(d);
-    sleep(time); /*aguenta a janela*/
+    sleep(time); /* Holds the window */
     g2_close(d);
 }
 
-/*************************************/
-/* Gere as cores                          */
-/************************************/
+/******************/
+/* Manages colors */
+/******************/
 
 int border_color(char cor[25])
 {
-    if (strcmp(cor, "preto") == 0)
+    if (strcmp(cor, "black") == 0)
     {
-        printf("\n\nA cor escolhida nao e valida. Escolha entre verde, amarelo, vermelho, azul, cor-de-laranja e cor-de-rosa\n\n");
+        printf("\n\nThe chosen color is not valid. Choose between green, yellow, red, blue, orange or pink\n\n");
     }
 
-    if (strcmp(cor, "vermelho") == 0)
+    if (strcmp(cor, "red") == 0)
     {
         return 19;
     }
 
-    if (strcmp(cor, "azul") == 0)
+    if (strcmp(cor, "blue") == 0)
     {
         return 3;
     }
 
-    if (strcmp(cor, "verde") == 0)
+    if (strcmp(cor, "green") == 0)
     {
         return 4;
     }
 
-    if (strcmp(cor, "amarelo") == 0) /* gera as cores*/
+    if (strcmp(cor, "yellow") == 0) 
     {
         return 25;
     }
 
-    if (strcmp(cor, "cor-de-laranja") == 0)
+    if (strcmp(cor, "orange") == 0)
     {
         return 22;
     }
 
-    if (strcmp(cor, "cor-de-rosa") == 0)
+    if (strcmp(cor, "pink") == 0)
     {
         return 23;
     }
@@ -336,7 +336,7 @@ LIST *create_base()
     strcpy((*top).a.place_name1, "\0");
     strcpy((*top).a.place_name2, "\0");
     strcpy((*top).a.road, "\0");
-    (*top).a.lat1 = 0; /*cria uma baze vazia do tipo LIST*/
+    (*top).a.lat1 = 0; /* Creates an empty base of type LIST */
     (*top).a.lat2 = 0;
     (*top).a.long1 = 0;
     (*top).a.long2 = 0;
@@ -352,14 +352,14 @@ void add_road(LIST *base, char *place_name1, char *place_name2, char *road, floa
     LIST *aux, *ptr;
     aux = base;
     if (aux == NULL)
-        printf("erro na base da list");
+        printf("Error on base of list");
     while ((*aux).prox != NULL)
     {
         aux = (*aux).prox;
     }
 
     ptr = (LIST *)malloc(sizeof(LIST));
-    strcpy((*ptr).a.place_name1, place_name1); /*adiciona uma nova estrada a uma lista inicial de estradas*/
+    strcpy((*ptr).a.place_name1, place_name1); /* Adds a new road and an initial list of roads */
     strcpy((*ptr).a.place_name2, place_name2);
     strcpy((*ptr).a.road, road);
     (*ptr).a.lat1 = lat1;
@@ -378,13 +378,13 @@ LIST *from_file_to_list()
     char nl1[MAXIMUM];
     char nl2[MAXIMUM];
     char etd[MAXIMUM];
-    float lt1, lg1, lt2, lg2; /*vai buscar dados ao ficheiro e adiciona à lista de*/
-    char type1, type2;        /*estradas usando a funcao anterior*/
+    float lt1, lg1, lt2, lg2; /* Fetches data from file and adds to list of roads using the previous function */
+    char type1, type2;        
     LIST *base;
     FILE *fp;
     char *p;
-    if ((fp = fopen("vias_localidades.txt", "r")) == NULL)
-        printf("Erro na leitura do ficheiro\n");
+    if ((fp = fopen("roads_towns.txt", "r")) == NULL)
+        printf("Error reading file\n");
 
     base = create_base();
     do
@@ -393,7 +393,7 @@ LIST *from_file_to_list()
         sscanf(linha, "%c %s %f %f %s %c %s %f %f", &type1, nl1, &lt1, &lg1, etd, &type2, nl2, &lt2, &lg2);
         /*if (sscanf(linha,"%c %s %f %f %s %c %s %f %f",&type1,nl1,&lt1,&lg1,etd,&type2,nl2,&lt2,&lg2)!=9)
             {
-                printf("\nFicheiro corrompido.\n");
+                printf("\nCorrupted file.\n");
                 exit(0);
             }*/
 
@@ -406,7 +406,7 @@ LIST *from_file_to_list()
 void print_list(LIST *base)
 {
 
-    LIST *aux; /*imprime a lista (foi usado para testes durante o desenvolvimento do programa*/
+    LIST *aux; /* Prints list (was used for tests fusing the development) */
     aux = base;
 
     aux = (*aux).prox;
@@ -420,7 +420,6 @@ void print_list(LIST *base)
 float calculate_distance(float lat1, float long1, float lat2, float long2)
 {
     float distance;
-    /*é auto-explicatória*/
     distance = sqrt((lat1 - lat2) * (lat1 - lat2) + (long1 - long2) * (long1 - long2));
 
     return distance;
@@ -429,10 +428,10 @@ float calculate_distance(float lat1, float long1, float lat2, float long2)
 TOWN *create_top()
 {
     TOWN *top;
-    top = (TOWN *)malloc(sizeof(TOWN)); /*cria uma base vazia do tipo TOWN (estalista servirá para, por exemplo*/
-    strcpy((*top).road, "\0");          /*se escolhermos como ponto de partida 'LISBOA', armazenar todas as localiades ligadas a lisboa*/
-    strcpy((*top).nome, "\0");          /*estas localidades serão depois ordenadas com base na sua distancia ao destino*/
-    (*top).lat1 = 0;                    /*e será depois transformada a que tiver menor distancia num POINT*/
+    top = (TOWN *)malloc(sizeof(TOWN)); /* Creates an empty base of type TOWN (this list will be used to, e.g. */
+    strcpy((*top).road, "\0");          /* choosing LISBOA as the orgin, store all towns connected to LISBOA */
+    strcpy((*top).nome, "\0");          /* these locations will the be ordered based on their distance to the destination */
+    (*top).lat1 = 0;                    /* and the one with the smallest distance will be turned into a POINT */
     (*top).distance = 0;
     (*top).long1 = 0;
     (*top).prox = NULL;
@@ -446,7 +445,7 @@ void add_town(TOWN *top, char *nome1, char *road, float lat1, float long1, float
     float distance;
     aux = top;
     if (aux == NULL)
-        printf("Há um mau funcionamento na base da lista.\n"); /*adiciona localidades, neste caso, que ligam com LISBOA*/
+        printf("Something is not right on the base of the list.\n"); /* Adds towns that, in this case, connect to LISBOA */
 
     while ((*aux).prox != NULL)
     {
@@ -470,8 +469,8 @@ TOWN *search_for_roads(char *nomeo, LIST *base, float latd, float longd)
     TOWN *top;
     aux = base;
     top = create_top();
-    /*Com o exemplo anterior, procura todas as localidades que liga a Lisboa*/
-    while ((*aux).prox != NULL) /*e usa a funcao anterior para adicionar a essa lista intermedi de localidades*/
+    /* With the previous example, looks for all towns that connect to LISBOA */
+    while ((*aux).prox != NULL) /* And uses the previous function to add to this intermediate list of towns */
     {
 
         aux = (*aux).prox;
@@ -523,7 +522,7 @@ POINT *points_destination_or_origins(LIST *base, char *nomed)
 void print_town(TOWN *base)
 {
 
-    TOWN *aux; /*imprime a lista de pontos que será depois unida. Nao é usada.*/
+    TOWN *aux; /* Prints the list of points that will then be united. Not used */
     aux = base;
 
     while (aux != NULL)
@@ -538,15 +537,14 @@ TOWN *order_town(TOWN *top)
     TOWN *aux1, *aux2, *aux3;
     aux1 = top;
     aux2 = top;
-    aux3 = top; /*ordena a lista intermédia de localidades.*/
+    aux3 = top; /* Orders the intermediate list of towns */
     aux2 = (*aux1).prox;
 
-    /**testa se não tem 1*/
     if ((*aux1).prox == NULL)
-        printf("localidade sem roads");
+        printf("Town with no roads");
 
     if ((*aux2).prox == NULL)
-        printf("tem apenas uma road ");
+        printf("Town with a single road");
 
     else
     {
@@ -580,7 +578,7 @@ POINT *create_inicio()
 {
     POINT *top;
     top = (POINT *)malloc(sizeof(POINT));
-    (*top).lat1 = 0; /*cria uma base vazia para a lista de pontos a unir.*/
+    (*top).lat1 = 0; /* Creates an empty base for the list of points to unite */
     (*top).long1 = 0;
     (*top).prox = NULL;
     return top;
@@ -594,7 +592,7 @@ char *adiciona_point(POINT *top_points, TOWN *top_town)
     aux = top_points;
 
     while ((*aux).prox != NULL)
-        aux = (*aux).prox; /*adiciona um ponto à lista de pontos a unir.*/
+        aux = (*aux).prox; /* Adds a point to the list of points to unite */
 
     p = (*p).prox;
     ptr = (POINT *)malloc(sizeof(POINT));
@@ -607,9 +605,11 @@ char *adiciona_point(POINT *top_points, TOWN *top_town)
 
 POINT *main_list_funcion(char *nomeo, char *nomed, LIST *base)
 {
-    POINT *point_destino, *point_origem, *top_list_points; /*Funçao principal.Repete o processo explicado*/
-    char novaorigem[MAXIMUM];                              /*anteriormente com o exemplo Lisboa.*/
-    TOWN *top_temporary;                                   /*para os pontos seguintes, até chegar ao destino.*/
+
+    POINT *point_destino, *point_origem, *top_list_points; /* Main function. Repeats the process explained */
+    char novaorigem[MAXIMUM];                              /* previously with the LISBOA example for the */
+    TOWN *top_temporary;                                   /* following points, until the destination is reached */
+
 
     top_temporary = create_top();
     point_destino = points_destination_or_origins(base, nomed);
@@ -624,7 +624,6 @@ POINT *main_list_funcion(char *nomeo, char *nomed, LIST *base)
 
         top_temporary = search_for_roads(nomeo, base, (*point_destino).lat1, (*point_destino).long1);
         top_temporary = order_town(top_temporary);
-        /*puts("aqui");*/
         aux = top_temporary;
         aux = (*aux).prox;
 
@@ -643,7 +642,7 @@ POINT *main_list_funcion(char *nomeo, char *nomed, LIST *base)
         /*  a++;
         if (a>100)
             {
-                printf("\nErro nas rotas.\n");
+                printf("\nRoute error.\n");
                 return (0);
             }*/
     }
@@ -670,7 +669,7 @@ void print_points(POINT*base)
 char *put_parentesis(char *town)
 {
     char string[100], copy[100];
-    strcpy(copy, town); /*Poe os parentesis. Assim, ao pedirmos como destino "Lisboa" o programa procurará "(Lisboa) no ficheiro.*/
+    strcpy(copy, town); /* Adds parentheses. This way, if we ask for LISBOA as destination, the program will seek (LISBOA) in the file */
     strcpy(town, "(");
     strcat(town, copy);
     strcat(town, ")");
@@ -682,7 +681,7 @@ int no_more_segmentation_fault(LIST *base, char *nome)
     LIST *aux;
     aux = base;
 
-    while (aux != NULL) /*explicada na main*/
+    while (aux != NULL)
     {
         if (strcmp((*aux).a.place_name1, nome) == 0 || strcmp((*aux).a.place_name2, nome) == 0)
         {
@@ -692,6 +691,6 @@ int no_more_segmentation_fault(LIST *base, char *nome)
         aux = (*aux).prox;
     }
 
-    printf("Esse sítio não existe... Vejo que o estereotipo de turista que não conhece o seu país lhe assenta bem... Oriente-se e volte mais tarde. \n");
+    printf("Invalid location. Exiting. \n");
     exit(0);
 }
